@@ -1,5 +1,5 @@
 # diffusion-xray
-experiments and utilities to reverse engineer diffusion model mechanics and its neural networks.
+Experiments and utilities to reverse engineer diffusion model mechanics and their neural networks structure. 
 
 ## Experiments
 all experiments are scripts that start with test* or text* filename. They each decompose the building blocks of a diffuction model and test its characterictics in isolation.
