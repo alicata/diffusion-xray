@@ -13,7 +13,8 @@ all experiments are scripts that start with test* or text* filename. They each t
 Module xray/tensor_debug contains a DebugTensor class to support reverse engineer an encoded vector at various (de)noising stages.
 
 ## Setup Notes
-* download stable diffusion weights from Keras-CV https://github.com/keras-team/keras-io/blob/master/guides/keras_cv/generate_images_with_stable_diffusion.py
+* download stable diffusion weights from Keras-CV 
+  https://github.com/keras-team/keras-io/blob/master/guides/keras_cv/generate_images_with_stable_diffusion.py
 * pip install opencv-python numpy keras keras-cv
 
 The backend image encoder, decoder are based on Keras, but could in theory be swapped with a Pytorch or similar other DL frameowrk. But the Keras implementation makes it possible to run on CPU accessible host memory (not possible with NVDIA GPUs with 4GB VRAM or less)
