@@ -1,10 +1,14 @@
 # Diffusion-xray
-Experiments and utilities to reverse engineer diffusion model mechanics and their neural networks structure. 
+Experiments and utilities to reverse engineer diffusion model mechanics and their neural networks structure on a CPU laptop for ease of inspecting.  
 
 * CPU instead of NVIDIA GPU kernels
-* 8GB or less host memory instead of 8GB VRAM
+* 8GB or less host memory instead of 8GB GPU VRAM
 
 ![xray](https://github.com/alicata/diffusion-xray/blob/main/model_architecture.png)
+
+1. Autoencoder: VAE architecture reduces input noise and generates denoised samples by compressing and decompressing them.
+2. U-Net: ResNet-based block compresses noisy samples, reconstructs them with reduced noise using estimated residuals for denoised representation.
+3. Text Encoder: CLIP ViT-L/14 Text Encoder processes prompt, produces embeddings for text analysis in Stable Diffusio
 
 ## Overview
 all experiments are scripts that start with test* or text* filename. They each test building blocks or simpler internal modules of the diffusion model.
@@ -18,7 +22,7 @@ all experiments are scripts that start with test* or text* filename. They each t
 Module xray/tensor_debug contains a DebugTensor class to support reverse engineer an encoded vector at various (de)noising stages.
 
 ## Setup Notes
-* `pip install -r requirements`
+* `pip install -r requirements` (warning: uninstall GPU keras as would conflict with CPU keras version)
 * [download weights](https://github.com/keras-team/keras-io/blob/master/guides/keras_cv/generate_images_with_stable_diffusion.py)
 
 
