@@ -1,7 +1,7 @@
 # Diffusion-xray
 Experiments and utilities to reverse engineer stable diffusion model mechanics and their neural networks structure on a CPU laptop for ease of inspecting.  
 
-## Alternatives to running SD on NVIDIA GPU
+## Alternatives to running SD on GPU
 * Run Tensorflow on CPU  
 * 8GB or less host memory instead of 8GB GPU VRAM
 
