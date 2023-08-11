@@ -7,9 +7,12 @@ Experiments and utilities to reverse engineer stable diffusion model mechanics a
 
 ![xray](https://github.com/alicata/diffusion-xray/blob/main/model_architecture.png)
 
-1. Autoencoder: VAE architecture reduces input noise and generates denoised samples by compressing and decompressing them.
-2. U-Net: ResNet-based block compresses noisy samples, reconstructs them with reduced noise using estimated residuals for denoised representation.
-3. Text Encoder: CLIP ViT-L/14 Text Encoder processes prompt, produces embeddings for text analysis in Stable Diffusio
+
+
+1. Autoencoder: VAE architecture encodes the input image into a compressed latent vector, and decodes the denoised latent vector back into a image.
+2. [UNet](https://github.com/alicata/diffusion-xray/blob/main/stable_diffusion_tf/diffusion_model.py#L138): ResNet-based blocks denoise noisy latent vector, reconstructs them with estimated residuals, and the cross-attention layers integrate the conditional text embedding vector.
+3. Text Encoder: CLIP ViT-L/14 Text Encoder processes prompt, produces embeddings for text conditioning (input to the attention layers in the UNet).
+4. Scheduler runs noising of latent vector forward for several steps, and also runs the UNet denoiser backwards the needed time steps.
 
 ## Overview
 all experiments are scripts that start with test* or text* filename. They each test building blocks or simpler internal modules of the diffusion model.
