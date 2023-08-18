@@ -10,16 +10,25 @@ Experiments and utilities to reverse engineer stable diffusion model mechanics a
 
 ### Image Generator
 The diffusion model generator orchestrates image generation through the AE, UNet, Text Encoder, Noise Scheduler:
-1. Autoencoder: VAE architecture encodes the input image into a compressed latent vector, and decodes the denoised latent vector back into a image.
-2. [UNet](https://github.com/alicata/diffusion-xray/blob/main/stable_diffusion_tf/diffusion_model.py#L138): ResNet-based blocks predict noise in latent vector (estimated residuals),  the cross-attention layers steer the residuals using the conditional text embedding vector
-3. Text Encoder: CLIP ViT-L/14 Text Encoder processes prompt, produces embeddings for text conditioning (input to the attention layers in the UNet).
-4. Scheduler runs noising of latent vector forward for several steps (train), and also runs the UNet denoiser backwards the needed time steps (train, inference)
+1. Autoencoder
+   - VAE encodes the input image into a compressed latent vector
+   - VAE decodes the denoised latent vector back into a image
+2. [UNet](https://github.com/alicata/diffusion-xray/blob/main/stable_diffusion_tf/diffusion_model.py#L138)
+   - ResNet-based blocks predict noise in latent vector (estimated residuals)
+   - Cross-attention layers steer the residuals using the conditional text embedding vector
+3. Text Encoder CLIP ViT-L/14
+   - Text Encoder tokenizes prompt
+   - Text Encoder produces embeddings for text conditioning (input to the attention layers in the UNet).
+4. Noise Scheduler (DDPM / DDIM)
+   - runs noising of latent vector forward for several steps (train)
+   - runs the UNet denoiser backwards the needed time steps (train, inference)
 
-### Generator Sampling: Image Corrupting Noise vs Distribution Stabilizing Noise
-An interesting sampling idea, the generator has notions of **predicted** "corrupting" noise vs **extra** "stabilizing" noise.
+### Sampling: Image Corrupting Noise vs Distribution Stabilizing Noise
+An interesting sampling algorithm idea: **predicted** "corrupting" noise vs **extra** "stabilizing" noise.
+
 At each step,
-* the generator removes the predicted corrupting noise (image pixel sample not normally distribution anymore)
-* the generator adds back a smaller scaled stabilizing noise to the currently denoised image (image pixel sample normally distributed again)
+* the sampling algorithm removes the predicted corrupting noise (image pixel sample not normally distribution anymore)
+* the sampling algorithm adds back a smaller scaled stabilizing noise to the currently denoised image (image pixel sample normally distributed again)
 * the normally distributed image sample becomes compatible again with the distribution expected by the UNet residual predictor.  
 
 ```
@@ -34,7 +43,20 @@ def denoise_add_noise(x, t, pred_noise):
 ### Debugging Noise
 If the **extra** noise is not adding back the UNet denoiser predicts wrong noise levels that collapse the image mean values. 
 
-## Overview
+### Context & Time Embedding ~ Scaling & Offset the Noise Decoder Level 
+For each time step,
+- Time Embedding added to UNet so the UNet decoder offsets the image noise with the right noise step.
+- Context Embedding added to UNet controls UNet decoder image noise level by text embedding
+
+# Model Training: Random Timestep & Loss
+* Sample a random image, and sample a random timestep (noise level)
+* compare predicted noise at the time step with actual injected noise
+* compute loss from actual and predicted noise
+
+# Control Sampling
+* Context embedding cemb
+
+## Experiments Overview
 all experiments are scripts that start with test* or text* filename. They each test building blocks or simpler internal modules of the diffusion model.
 * test noise corruptions in the image encoder
 * test the image decoder
