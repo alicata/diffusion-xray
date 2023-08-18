@@ -51,10 +51,22 @@ For each time step,
 # Model Training: Random Timestep & Loss
 * Sample a random image, and sample a random timestep (noise level)
 * compare predicted noise at the time step with actual injected noise
-* compute loss from actual and predicted noise
+* compute MSE(noise_true, noise_pred) loss from actual and predicted noise
 
 # Control Sampling
-* Context embedding cemb
+* Context embedding cemb is added to the random noise during training
+
+# Fast Sampling: DDIM
+```
+def sample_ddim(n_sample, n):
+    samples = randn(n_sample, 3, height, height).to(device)  
+    step_size = timesteps // n
+
+    for i in range(timesteps, 0, -step_size):
+        t = tensor([i / timesteps])[:, None, None, None]
+        pred_noise = nn_model(samples, t)   
+        samples = denoise_ddim(samples, i, i - step_size, pred_noise)
+```
 
 ## Experiments Overview
 all experiments are scripts that start with test* or text* filename. They each test building blocks or simpler internal modules of the diffusion model.
