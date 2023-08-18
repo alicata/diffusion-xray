@@ -15,21 +15,24 @@ The diffusion model generator orchestrates image generation through the AE, UNet
 3. Text Encoder: CLIP ViT-L/14 Text Encoder processes prompt, produces embeddings for text conditioning (input to the attention layers in the UNet).
 4. Scheduler runs noising of latent vector forward for several steps (train), and also runs the UNet denoiser backwards the needed time steps (train, inference)
 
-### Image Corrupting Noise vs Distribution Stabilizing Noise
-An interesting idea, the generator has notions of "bad" corrupting noise vs "good" stabilizing noise.
+### Generator Sampling: Image Corrupting Noise vs Distribution Stabilizing Noise
+An interesting sampling idea, the generator has notions of **predicted** "corrupting" noise vs **extra** "stabilizing" noise.
 At each step,
-* the generator removes the predicted corrupting noise (which changes the image pixel distribution)
-* the generator adds back a smaller scaled stabilizing noise to the currently denoised image
-* the image noise distribution becomes compatible again with the distribution expected by the UNet residual predictor.  
+* the generator removes the predicted corrupting noise (image pixel sample not normally distribution anymore)
+* the generator adds back a smaller scaled stabilizing noise to the currently denoised image (image pixel sample normally distributed again)
+* the normally distributed image sample becomes compatible again with the distribution expected by the UNet residual predictor.  
 
 ```
-# remove the predicted noise and noise back in to avoid denoising collapse due to changed noise distribution
+# remove the predicted noise from corrupted image x
+# z noise back in to avoid denoising collapse due to changed noise distribution
 def denoise_add_noise(x, t, pred_noise):
-    z = tf.randn_like(x)
-    noise = b_t.sqrt()[t] * z
+    z_noise = b_t.sqrt()[t] * tf.randn_like(x) # stabilizing noise
     mean = (x - pred_noise * ((1 - a_t[t]) / (1 - ab_t[t]).sqrt())) / a_t[t].sqrt()
-    return mean + noise
+    return mean + z_noise
 ```
+
+### Debugging Noise
+If the **extra** noise is not adding back the UNet denoiser predicts wrong noise levels that collapse the image mean values. 
 
 ## Overview
 all experiments are scripts that start with test* or text* filename. They each test building blocks or simpler internal modules of the diffusion model.
