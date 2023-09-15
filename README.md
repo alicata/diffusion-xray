@@ -31,17 +31,27 @@ At each step,
 * the sampling algorithm adds back a smaller scaled stabilizing noise to the currently denoised image (image pixel sample normally distributed again)
 * the normally distributed image sample becomes compatible again with the distribution expected by the UNet residual predictor.  
 
+
+| Feature           |  Modelling Equation                                        | Description                                    | 
+| ----------------- | ---------------------------------------------------------- | ---------------------------------------------- | 
+|Stabilizing noise  | $$z_{\text{noise}} = \sqrt{b_t} \times \mathcal{N}(0, I)$$ | Make denoised image normally distributed again.| 
+|mean image         | `mean = (x - pred_noise * ((1 - a_t) / sqrt(1 - ab_t))) / sqrt(a_t)` | Remove the predicted noise from corrupted image x| 
+
 ```
 # remove the predicted noise from corrupted image x
 # z noise back in to avoid denoising collapse due to changed noise distribution
 def denoise_add_noise(x, t, pred_noise):
-    z_noise = b_t.sqrt()[t] * tf.randn_like(x) # stabilizing noise
+
+    # stabilizing noise
+    z_noise = b_t.sqrt()[t] * tf.randn_like(x) 
+
     mean = (x - pred_noise * ((1 - a_t[t]) / (1 - ab_t[t]).sqrt())) / a_t[t].sqrt()
     return mean + z_noise
 ```
 
-### Debugging Noise
-If the **extra** noise is not adding back the UNet denoiser predicts wrong noise levels that collapse the image mean values. 
+
+### Debugging Noise - Distribution Collapse
+If the **extra** noise is not added back the UNet denoiser predicts wrong noise levels that collapse the image mean values. 
 
 ### Context & Time Embedding ~ Scaling & Offset the Noise Decoder Level 
 For each time step,
